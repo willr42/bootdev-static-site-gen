@@ -1,6 +1,12 @@
 import unittest
 
-from textnode import TextNode, TextType, split_nodes_delimiter, text_node_to_html_node
+from textnode import (
+    TextNode,
+    TextType,
+    extract_markdown_images,
+    extract_markdown_links,
+    text_node_to_html_node,
+)
 
 
 class TestTextNode(unittest.TestCase):
@@ -44,23 +50,29 @@ class TestTextToHTMLNode(unittest.TestCase):
         self.assertEqual(html_node.to_html(), "<b>This is a bold node</b>")
 
 
-class TestSplitNodes(unittest.TestCase):
-    def test_code_node(self):
-        node = TextNode("This is text with a `code block` word", TextType.TEXT)
-        nodelist = [
-            TextNode("This is text with a ", TextType.TEXT),
-            TextNode("code block", TextType.CODE),
-            TextNode(" word", TextType.TEXT),
-        ]
-        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
-        self.assertListEqual(nodelist, new_nodes)
+class TestExtractImages(unittest.TestCase):
+    def test_image_extract(self):
+        matches = extract_markdown_images(
+            "This is text with an ![image](https://i.imgur.com/zjjcJKZ.png)"
+        )
+        self.assertListEqual([("image", "https://i.imgur.com/zjjcJKZ.png")], matches)
 
-    def test_bold_node(self):
-        node = TextNode("This is text with a **bold block** word", TextType.TEXT)
-        nodelist = [
-            TextNode("This is text with a ", TextType.TEXT),
-            TextNode("bold block", TextType.BOLD),
-            TextNode(" word", TextType.TEXT),
-        ]
-        new_nodes = split_nodes_delimiter([node], "**", TextType.BOLD)
-        self.assertListEqual(nodelist, new_nodes)
+
+class TextExtractLinks(unittest.TestCase):
+    def test_link_extract(self):
+        matches = extract_markdown_links(
+            "This is text with a [link](http://example.com)"
+        )
+        self.assertListEqual([("link", "http://example.com")], matches)
+
+    def test_multiple_links(self):
+        matches = extract_markdown_links(
+            "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        )
+        self.assertListEqual(
+            [
+                ("to boot dev", "https://www.boot.dev"),
+                ("to youtube", "https://www.youtube.com/@bootdotdev"),
+            ],
+            matches,
+        )

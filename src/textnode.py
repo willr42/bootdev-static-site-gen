@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 
 from htmlnode import LeafNode
 
@@ -31,6 +32,14 @@ class TextNode:
         return f"TextNode({self.text}, {self.text_type}, {self.url})"
 
 
+def extract_markdown_images(text: str):
+    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+
+def extract_markdown_links(text: str):
+    return re.findall(r"\[([^\[\]]*)]\(([^\(\)]*)\)", text)
+
+
 def text_node_to_html_node(text_node: TextNode):
     """Turns a given TextNode to a LeafNode"""
     match text_node.text_type:
@@ -48,24 +57,3 @@ def text_node_to_html_node(text_node: TextNode):
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
             raise Exception("somehow unsupported TextType")
-
-
-def split_nodes_delimiter(
-    old_nodes: list[TextNode], delimiter: str, text_type: TextType
-):
-    """Splits up a TEXT TextNode into new TextNodes based on a delimiter"""
-    new_nodes: list[TextNode] = []
-    for n in old_nodes:
-        if n.text_type != TextType.TEXT:
-            new_nodes.append(n)
-            continue
-        parts = n.text.split(delimiter)
-        if len(parts) % 2 == 0:
-            raise Exception("non-valid Markdown syntax")
-        for i, part in enumerate(parts):
-            if i % 2 != 0:
-                new_nodes.append(TextNode(part, text_type))
-            else:
-                new_nodes.append(TextNode(part, n.text_type))
-
-    return new_nodes
