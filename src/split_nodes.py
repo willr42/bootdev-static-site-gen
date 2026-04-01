@@ -17,7 +17,8 @@ def split_nodes_delimiter(
             if i % 2 != 0:
                 new_nodes.append(TextNode(part, text_type))
             else:
-                new_nodes.append(TextNode(part, n.text_type))
+                if part != "":
+                    new_nodes.append(TextNode(part, n.text_type))
 
     return new_nodes
 
@@ -33,6 +34,7 @@ def split_nodes_link(old_nodes: list[TextNode]):
 
         # if none found, go to next node
         if len(links) == 0:
+            new_nodes.append(n)
             continue
 
         remaining = n.text
@@ -70,6 +72,7 @@ def split_nodes_image(old_nodes: list[TextNode]):
 
         # if none found, go to next node
         if len(images) == 0:
+            new_nodes.append(n)
             continue
 
         remaining = n.text
