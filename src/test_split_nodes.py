@@ -1,6 +1,6 @@
 import unittest
 
-from split_nodes import split_nodes_delimiter, split_nodes_link
+from split_nodes import split_nodes_delimiter, split_nodes_image, split_nodes_link
 from textnode import TextNode, TextType
 
 
@@ -41,4 +41,24 @@ class TestSplitNodesLink(unittest.TestCase):
             ),
         ]
         new_nodes = split_nodes_link([node])
+        self.assertListEqual(nodelist, new_nodes)
+
+
+class TestSplitNodesImage(unittest.TestCase):
+    def test_image_node(self):
+        node = TextNode(
+            "This is text with an image ![to boot dev](https://www.boot.dev/img/logo.png) and ![to youtube](https://www.youtube.com/img/logo.png)",
+            TextType.TEXT,
+        )
+        nodelist = [
+            TextNode("This is text with an image ", TextType.TEXT),
+            TextNode(
+                "to boot dev", TextType.IMAGE, "https://www.boot.dev/img/logo.png"
+            ),
+            TextNode(" and ", TextType.TEXT),
+            TextNode(
+                "to youtube", TextType.IMAGE, "https://www.youtube.com/img/logo.png"
+            ),
+        ]
+        new_nodes = split_nodes_image([node])
         self.assertListEqual(nodelist, new_nodes)

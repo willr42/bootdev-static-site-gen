@@ -1,4 +1,4 @@
-from textnode import TextNode, TextType, extract_markdown_links
+from textnode import TextNode, TextType, extract_markdown_images, extract_markdown_links
 
 
 def split_nodes_delimiter(
@@ -25,35 +25,72 @@ def split_nodes_delimiter(
 def split_nodes_link(old_nodes: list[TextNode]):
     new_nodes: list[TextNode] = []
     for n in old_nodes:
+        # non-text nodes pass through unchanged
         if n.text_type != TextType.TEXT:
             new_nodes.append(n)
             continue
         links = extract_markdown_links(n.text)
 
-        remaining = n.text
+        # if none found, go to next node
         if len(links) == 0:
             continue
 
+        remaining = n.text
         for link in links:
-            image_alt = link[0]
-            image_link = link[1]
+            link_text = link[0]
+            link_url = link[1]
 
-            sections = remaining.split(f"[{image_alt}]({image_link})", 1)
+            # split on first occasion of link
+            sections = remaining.split(f"[{link_text}]({link_url})", 1)
 
+            # only add proceeding text if non-empty
             if sections[0] != "":
                 new_nodes.append(TextNode(sections[0], n.text_type))
 
-            new_nodes.append(TextNode(image_alt, TextType.LINK, image_link))
+            new_nodes.append(TextNode(link_text, TextType.LINK, link_url))
 
+            # carry forward leftover text
             remaining = sections[1]
 
+        # add trailing text from node
         if len(remaining) > 0:
             new_nodes.append(TextNode(remaining, n.text_type))
 
     return new_nodes
 
 
-#
 def split_nodes_image(old_nodes: list[TextNode]):
     new_nodes: list[TextNode] = []
-    pass
+    for n in old_nodes:
+        # non-text nodes pass through unchanged
+        if n.text_type != TextType.TEXT:
+            new_nodes.append(n)
+            continue
+        images = extract_markdown_images(n.text)
+
+        # if none found, go to next node
+        if len(images) == 0:
+            continue
+
+        remaining = n.text
+        for image in images:
+            alt_text = image[0]
+            image_url = image[1]
+
+            # split on first occasion of image
+            sections = remaining.split(f"![{alt_text}]({image_url})", 1)
+
+            # only add proceeding text if non-empty
+            if sections[0] != "":
+                new_nodes.append(TextNode(sections[0], n.text_type))
+
+            new_nodes.append(TextNode(alt_text, TextType.IMAGE, image_url))
+
+            # carry forward leftover text
+            remaining = sections[1]
+
+        # add trailing text from node
+        if len(remaining) > 0:
+            new_nodes.append(TextNode(remaining, n.text_type))
+
+    return new_nodes
