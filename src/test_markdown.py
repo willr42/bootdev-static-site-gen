@@ -1,9 +1,9 @@
 import unittest
 
-from markdown import markdown_to_blocks
+from markdown import BlockType, block_to_block_type, markdown_to_blocks
 
 
-class TestMarkdown(unittest.TestCase):
+class TestToBlocks(unittest.TestCase):
     def test_markdown_to_blocks(self):
         md = """
 This is **bolded** paragraph
@@ -43,3 +43,43 @@ This is a paragraph of text. It has some **bold** and _italic_ words inside of i
                 "- This is the first list item in a list block\n- This is a list item\n- This is another list item",
             ],
         )
+
+
+class TestBlockToBlockType(unittest.TestCase):
+    def test_headings(self):
+        parsed = block_to_block_type("# Heading")
+        self.assertEqual(parsed, BlockType.HEADING)
+        parsed = block_to_block_type("###### Heading 6")
+        self.assertEqual(parsed, BlockType.HEADING)
+        parsed = block_to_block_type("####### Heading 7 not a thing")
+        self.assertEqual(parsed, BlockType.PARAGRAPH)
+
+    def test_code_block(self):
+        parsed = block_to_block_type("```\nprint(I'm fake python code)```")
+        self.assertEqual(parsed, BlockType.CODE)
+
+    def test_quote_block(self):
+        parsed = block_to_block_type("> a fake quote\n> that spans\n> multiple lines")
+        self.assertEqual(parsed, BlockType.QUOTE)
+        parsed = block_to_block_type("> a fake quote\nthat's malformed")
+        self.assertEqual(parsed, BlockType.PARAGRAPH)
+
+    def test_unordered_list(self):
+        parsed = block_to_block_type("- an unordered list\n- on multiple lines")
+        self.assertEqual(parsed, BlockType.UNORDERED_LIST)
+        parsed = block_to_block_type("- an unordered list\nthat's malformed")
+        self.assertEqual(parsed, BlockType.PARAGRAPH)
+
+    def test_ordered_list(self):
+        parsed = block_to_block_type("1. an unordered list\n2. on multiple lines")
+        self.assertEqual(parsed, BlockType.ORDERED_LIST)
+        parsed = block_to_block_type("1. an unordered list\nthat's malformed")
+        self.assertEqual(parsed, BlockType.PARAGRAPH)
+        parsed = block_to_block_type(
+            "1. an unordered list\n3. that counts wrongly\n2. oops"
+        )
+        self.assertEqual(parsed, BlockType.PARAGRAPH)
+
+    def test_paragraph(self):
+        parsed = block_to_block_type("just some random paragraph")
+        self.assertEqual(parsed, BlockType.PARAGRAPH)
