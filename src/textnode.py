@@ -57,3 +57,10 @@ def text_node_to_html_node(text_node: TextNode):
             return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
         case _:
             raise Exception("somehow unsupported TextType")
+
+
+def text_nodes_to_html_nodes(inp: list[TextNode]):
+    html_nodes: list[LeafNode] = []
+    for node in inp:
+        html_nodes.append(text_node_to_html_node(node))
+    return html_nodes

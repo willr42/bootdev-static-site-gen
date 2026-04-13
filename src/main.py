@@ -1,9 +1,15 @@
-from textnode import TextNode
+from markdown import markdown_to_html_node
 
 
 def main():
-    text_node = TextNode("This is some anchor text", "link", "https://www.boot.dev")
-    print(text_node)
+    md = """
+    This is **bolded** paragraph
+    text in a p
+    tag here
+
+    This is another paragraph with _italic_ text and `code` here
+    """
+    node = markdown_to_html_node(md)
 
 
 main()
