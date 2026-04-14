@@ -27,6 +27,3 @@ def recursive_copy(inp: Path, out: Path):
             print(f"making dir at {out_fp}")
             out_fp.mkdir()
             recursive_copy(Path(inp, res), out_fp)
-
-    # contents = os.listdir(inp)
-    # print(contents)
