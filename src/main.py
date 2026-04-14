@@ -1,15 +1,14 @@
-from markdown import markdown_to_html_node
+from os import getcwd
+from pathlib import Path
+
+from build import build_output_dir
 
 
 def main():
-    md = """
-    This is **bolded** paragraph
-    text in a p
-    tag here
-
-    This is another paragraph with _italic_ text and `code` here
-    """
-    node = markdown_to_html_node(md)
+    cwd = getcwd()
+    inp_path = Path(cwd, "static")
+    out_path = Path(cwd, "public")
+    build_output_dir(inp_path, out_path)
 
 
 main()
